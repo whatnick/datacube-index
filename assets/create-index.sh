@@ -28,12 +28,7 @@ function add_products {
 add_products
 
 # Generate WMS specific config
-PGPASSWORD=$DB_PASSWORD psql \
-    -d $DB_DATABASE \
-    -h $DB_HOSTNAME \
-    -p $DB_PORT \
-    -U $DB_USERNAME \
-    -f /code/create_tables.sql 2>&1
+python3 ../update_ranges.py --schema
 
 # Run index
 indexing/update_ranges_wrapper.sh

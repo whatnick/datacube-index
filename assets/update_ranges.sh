@@ -12,9 +12,9 @@
 #        -d product to update in database (optional)
 # e.g. ./update_ranges -b dea-public-data -p "L2/sentinel-2-nrt/S2MSIARD/2018 L2/sentinel-2-nrt/2017"
 
-usage() { echo "Usage: $0 -u <protocol> -p <prefix> -b <bucket> [-s <suffix>] [-y UNSAFE]" 1>&2; exit 1; }
+usage() { echo "Usage: $0 -u <protocol> -p <prefix> -b <bucket> [-s <suffix>] [-i <ignore>] [-y UNSAFE]" 1>&2; exit 1; }
 
-while getopts ":u:p:b:s:y:d:" o; do
+while getopts ":u:p:b:s:i:y:d:" o; do
     case "${o}" in
         u)
             protocol=${OPTARG}
@@ -27,6 +27,9 @@ while getopts ":u:p:b:s:y:d:" o; do
             ;;
         s)
             suffix=${OPTARG}
+            ;;
+        s)
+            ignore=${OPTARG}
             ;;
         d)
             product=${OPTARG}
@@ -68,9 +71,11 @@ do
         dc-index-from-tar --protocol "${protocol}" metadata.tar.gz
     elif [ "${protocol}" == "http" ]
     then
-        thredds-to-tar -c "${b}/${prefixes[$i]}" \
-        -t ".*ARD-METADATA.yaml" -s '.*NBAR.*' -s '.*SUPPLEMENTARY.*' \
-        -s '.*NBART.*' -s '.*/QA/.*' -w 8
+        # renders list as " -s item -s item ..." using $@
+        set -- $ignore
+        set -- "${@/#/ -s }"
+
+        thredds-to-tar -c "${b}/${prefixes[$i]}" -t $suffix_string -w 8 $@ 
         dc-index-from-tar --protocol "${protocol}" metadata.tar.gz
     fi
 done
@@ -79,12 +84,12 @@ done
 
 if [ -z "$product" ]
 then
-    python3 /code/update_ranges.py --calculate-extent
+    python3 /code/update_ranges.py --no-calculate-extent
 else
 
     for i in "${!products[@]}"
     do
-        python3 /code/update_ranges.py --calculate-extent --product "${products[$i]}"
+        python3 /code/update_ranges.py --no-calculate-extent --product "${products[$i]}"
     done
 fi
 

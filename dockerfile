@@ -1,4 +1,4 @@
-FROM opendatacube/wms
+FROM opendatacube/wms:0.8.3-unstable.30.gc4c70d2
 
 # Ensure compatible versions of boto are installed
 RUN pip3 uninstall boto3 botocore dea-proto -y && \
