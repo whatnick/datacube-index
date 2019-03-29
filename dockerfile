@@ -10,10 +10,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN pip3 --no-cache-dir install -U 'aiobotocore[awscli,boto3]' google-cloud-storage
 
 # Install dea proto for indexing tools
-RUN pip3 --no-cache-dir install 'git+https://github.com/opendatacube/dea-proto.git#egg=odc_apps_cloud[GCP,THREDDS]&subdirectory=apps/cloud' && \
-    pip3 --no-cache-dir install 'git+https://github.com/opendatacube/dea-proto.git#egg=odc_apps_dc_tools&subdirectory=apps/dc_tools'
-
-
 COPY assets/update_ranges.sh /code/index/indexing/update_ranges.sh
 COPY assets/update_ranges_wrapper.sh /code/index/indexing/update_ranges_wrapper.sh
 COPY assets/create-index.sh /code/index/create-index.sh

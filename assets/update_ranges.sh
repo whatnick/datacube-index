@@ -28,11 +28,17 @@ while getopts ":u:p:b:s:i:y:d:" o; do
         s)
             suffix=${OPTARG}
             ;;
-        s)
+        y)
+            safety=${OPTARG}
+            ;;
+        i)
             ignore=${OPTARG}
             ;;
         d)
             product=${OPTARG}
+            ;;
+        l)
+            lineage=${OPTARG}
             ;;
     esac
 done
@@ -46,11 +52,20 @@ IFS=' ' read -r -a prefixes <<< "$prefix"
 IFS=' ' read -r -a suffixes <<< "$suffix"
 IFS=' ' read -r -a products <<< "$product"
 first_suffix="${suffixes[0]}"
+safety_arg=""
+
+if [ "$safety" == "SAFE" ]
+then
+    safety_arg="--skip-check"
+fi
+
+
 
 # index new datasets
 # prepare script will add new records to the database
 for i in "${!prefixes[@]}"
 do
+    # Set suffix string
     if [ -z "${suffixes[$i]}"  ] && [ -z "${first_suffix}" ]
     then
         suffix_string=""
@@ -60,23 +75,48 @@ do
     else
         suffix_string="${suffixes[$i]}"
     fi
-    if [ "${protocol}" == "s3" ]
-    then
-        s3-find "s3://${b}/${prefixes[$i]}" ${suffix_string:+"*$suffix_string"} | \
-        s3-yaml-to-tar | \
-        dc-index-from-tar
-    elif [ "${protocol}" == "gs" ]
-    then
-        gs-to-tar --bucket ${b} --prefix ${prefixes[$i]}
-        dc-index-from-tar --protocol "${protocol}" metadata.tar.gz
-    elif [ "${protocol}" == "http" ]
-    then
-        # renders list as " -s item -s item ..." using $@
-        set -- $ignore
-        set -- "${@/#/ -s }"
 
-        thredds-to-tar -c "${b}/${prefixes[$i]}" -t $suffix_string -w 8 $@ 
-        dc-index-from-tar --protocol "${protocol}" metadata.tar.gz
+    if [ -z "$lineage" ]
+    then
+        # Index 
+        if [ "${protocol}" == "s3" ]
+        then
+            s3-find $safety_arg "s3://${b}/${prefixes[$i]}" | \
+            s3-to-tar | \
+            dc-index-from-tar
+        elif [ "${protocol}" == "gs" ]
+        then
+            gs-to-tar --bucket ${b} --prefix ${prefixes[$i]}
+            dc-index-from-tar --protocol "${protocol}" metadata.tar.gz
+        elif [ "${protocol}" == "http" ]
+        then
+            # renders list as " -s item -s item ..." using $@
+            set -- $ignore
+            set -- "${@/#/ -s }"
+
+            thredds-to-tar -c "${b}/${prefixes[$i]}" -t $suffix_string -w 8 $@ 
+            dc-index-from-tar --protocol "${protocol}" metadata.tar.gz
+        fi
+    else
+        # Index without lineage
+        if [ "${protocol}" == "s3" ]
+        then
+            s3-find $safety_arg "s3://${b}/${prefixes[$i]}" | \
+            s3-to-tar | \
+            dc-index-from-tar --ignore-lineage
+        elif [ "${protocol}" == "gs" ]
+        then
+            gs-to-tar --bucket ${b} --prefix ${prefixes[$i]}
+            dc-index-from-tar --protocol "${protocol}" metadata.tar.gz --ignore-lineage
+        elif [ "${protocol}" == "http" ]
+        then
+            # renders list as " -s item -s item ..." using $@
+            set -- $ignore
+            set -- "${@/#/ -s }"
+
+            thredds-to-tar -c "${b}/${prefixes[$i]}" -t $suffix_string -w 8 $@ 
+            dc-index-from-tar --protocol "${protocol}" metadata.tar.gz --ignore-lineage
+        fi
     fi
 done
 

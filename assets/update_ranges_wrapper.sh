@@ -9,4 +9,5 @@ indexing/update_ranges.sh \
 -s "$DC_S3_INDEX_SUFFIX" \
 -i "$DC_S3_IGNORE_SUFFIX" \
 -y "$DC_INDEX_YAML_SAFETY" \
--d "$DC_RANGES_PRODUCT"
+-d "$DC_RANGES_PRODUCT" \
+-l "$DC_IGNORE_LINEAGE"

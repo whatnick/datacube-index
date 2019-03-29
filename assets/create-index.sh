@@ -28,7 +28,7 @@ function add_products {
 add_products
 
 # Generate WMS specific config
-python3 ../update_ranges.py --schema 2>&1 || echo "Warning: Can't create schema"
+python3 ../update_ranges.py --schema 2>&1 --role $DB_ROLE || echo "Warning: Can't create schema"
 
 # Run index
 indexing/update_ranges_wrapper.sh
