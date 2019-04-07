@@ -1,0 +1,25 @@
+dist: xenial
+sudo: required # Use the new travis docker based infrastructure
+services:
+  - docker
+git:
+  # We need a deeper depth for 'git descibe' to ensure
+  # we can reach the last tagged version.
+  depth: 99999
+language: python
+python:
+  # We don't use the travis python, but we will use it for the build matrix
+  - "3.6"
+jobs:
+  include:
+    - stage: test
+      script:
+        - docker build -t opendatacube/datacube-index:latest .
+    - stage: build
+      if: (branch = master OR (tag = branch)) AND type = push
+      script:
+        - export TAG="0.0.$TRAVIS_BUILD_NUMBER"
+        - docker build -t opendatacube/wms:$TAG -t opendatacube/wms:latest .
+        - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+        - docker push opendatacube/wms:$TAG
+        - docker push opendatacube/wms:latest
