@@ -98,6 +98,7 @@ for i in "${!prefixes[@]}"; do
 
         thredds-to-tar -c "${b}/${prefixes[$i]}" -t $suffix_string -w 8 $@ 
         dc-index-from-tar --protocol "${protocol}" metadata.tar.gz ${exclude:+"--exclude"} ${exclude:+"$exclude"} ${ignore-lineage:+"--ignore-lineage"}
+    fi
 done
 
 # update ranges in wms database

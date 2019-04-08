@@ -14,7 +14,7 @@ jobs:
     - stage: build
       if: (branch = master OR (tag = branch)) AND type = push
       script:
-        - export TAG="0.0.$TRAVIS_BUILD_NUMBER"
+        - export TAG="0.1.$TRAVIS_BUILD_NUMBER"
         - docker build -t opendatacube/datacube-index:$TAG -t opendatacube/datacube-index:latest .
         - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
         - docker push opendatacube/datacube-index:$TAG
