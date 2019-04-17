@@ -57,6 +57,7 @@ fi
 IFS=' ' read -r -a prefixes <<< "$prefix"
 IFS=' ' read -r -a suffixes <<< "$suffix"
 IFS=' ' read -r -a products <<< "$product"
+IFS=' ' read -r -a multiproducts <<< "$multiproduct"
 first_suffix="${suffixes[0]}"
 safety_arg=""
 
