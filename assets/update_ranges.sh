@@ -14,7 +14,7 @@
 
 usage() { echo "Usage: $0 -u <protocol> -p <prefix> -b <bucket> [-s <suffix>] [-i <ignore>] [-y UNSAFE]" 1>&2; exit 1; }
 
-while getopts ":u:p:b:s:i:y:d:l:e:" o; do
+while getopts ":u:p:b:s:i:y:d:m:l:e:" o; do
     case "${o}" in
         u)
             protocol=${OPTARG}
@@ -41,7 +41,7 @@ while getopts ":u:p:b:s:i:y:d:l:e:" o; do
             multiproduct=${OPTARG}
             ;;
         l)
-            ignore-lineage=${OPTARG}
+            ignorelineage=${OPTARG}
             ;;
         e)
             exclude=${OPTARG}
@@ -75,12 +75,12 @@ for i in "${!prefixes[@]}"; do
 
         s3-find $safety_arg "s3://${b}/${prefixes[$i]}" | \
         s3-to-tar | \
-        dc-index-from-tar ${exclude:+"--exclude"} ${exclude:+"$exclude"} ${ignore-lineage:+"--ignore-lineage"}
+        dc-index-from-tar ${exclude:+"--exclude"} ${exclude:+"$exclude"} ${ignorelineage:+"--ignore-lineage"}
 
     # Google Storage Bucket
     elif [ "${protocol}" == "gs" ]; then
         gs-to-tar --bucket ${b} --prefix ${prefixes[$i]}
-        dc-index-from-tar --protocol "${protocol}" metadata.tar.gz ${exclude:+"--exclude"} ${exclude:+"$exclude"} ${ignore-lineage:+"--ignore-lineage"}
+        dc-index-from-tar --protocol "${protocol}" metadata.tar.gz ${exclude:+"--exclude"} ${exclude:+"$exclude"} ${ignorelineage:+"--ignore-lineage"}
     
     # NCI thredds server
     elif [ "${protocol}" == "http" ]; then
@@ -98,7 +98,7 @@ for i in "${!prefixes[@]}"; do
         set -- "${@/#/ -s }"
 
         thredds-to-tar -c "${b}/${prefixes[$i]}" -t $suffix_string -w 8 $@ 
-        dc-index-from-tar --protocol "${protocol}" metadata.tar.gz ${exclude:+"--exclude"} ${exclude:+"$exclude"} ${ignore-lineage:+"--ignore-lineage"}
+        dc-index-from-tar --protocol "${protocol}" metadata.tar.gz ${exclude:+"--exclude"} ${exclude:+"$exclude"} ${ignorelineage:+"--ignore-lineage"}
     fi
 done
 
