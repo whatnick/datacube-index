@@ -9,6 +9,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Ensure compatible versions of boto are installed
 RUN pip3 --no-cache-dir install -U 'aiobotocore[awscli,boto3]' google-cloud-storage
 
+RUN pip3 --no-cache-dir install -U thredds_crawler
+
 # Install dea proto for indexing tools
 COPY assets/update_ranges.sh /code/index/indexing/update_ranges.sh
 COPY assets/update_ranges_wrapper.sh /code/index/indexing/update_ranges_wrapper.sh
