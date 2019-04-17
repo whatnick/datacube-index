@@ -80,7 +80,7 @@ for i in "${!prefixes[@]}"; do
     # Google Storage Bucket
     elif [ "${protocol}" == "gs" ]; then
         gs-to-tar --bucket ${b} --prefix ${prefixes[$i]}
-        dc-index-from-tar --protocol "${protocol}" metadata.tar.gz ${exclude:+"--exclude"} ${exclude:+"$exclude"} ${ignorelineage:+"--ignore-lineage"}
+        dc-index-from-tar --protocol "${protocol}" metadata.tar.gz ${exclude:+"--exclude-product"} ${exclude:+"$exclude"} ${ignorelineage:+"--ignore-lineage"}
     
     # NCI thredds server
     elif [ "${protocol}" == "http" ]; then
@@ -98,7 +98,7 @@ for i in "${!prefixes[@]}"; do
         set -- "${@/#/ -s }"
 
         thredds-to-tar -c "${b}/${prefixes[$i]}" -t $suffix_string -w 8 $@ 
-        dc-index-from-tar --protocol "${protocol}" metadata.tar.gz ${exclude:+"--exclude"} ${exclude:+"$exclude"} ${ignorelineage:+"--ignore-lineage"}
+        dc-index-from-tar --protocol "${protocol}" metadata.tar.gz ${exclude:+"--exclude-product"} ${exclude:+"$exclude"} ${ignorelineage:+"--ignore-lineage"}
     fi
 done
 
