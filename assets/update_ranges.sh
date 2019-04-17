@@ -75,7 +75,7 @@ for i in "${!prefixes[@]}"; do
 
         s3-find $safety_arg "s3://${b}/${prefixes[$i]}" | \
         s3-to-tar | \
-        dc-index-from-tar ${exclude:+"--exclude"} ${exclude:+"$exclude"} ${ignorelineage:+"--ignore-lineage"}
+        dc-index-from-tar ${exclude:+"--exclude-product"} ${exclude:+"$exclude"} ${ignorelineage:+"--ignore-lineage"}
 
     # Google Storage Bucket
     elif [ "${protocol}" == "gs" ]; then
