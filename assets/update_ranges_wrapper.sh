@@ -12,4 +12,5 @@ indexing/update_ranges.sh \
 -d "$DC_RANGES_PRODUCT" \
 -m "$DC_RANGES_MULTIPRODUCT" \
 -l "$DC_IGNORE_LINEAGE" \
--e "$DC_EXCLUDE_PRODUCT"
+-e "$DC_EXCLUDE_PRODUCT" \
+-n "$DC_THREDDS_DAYS"

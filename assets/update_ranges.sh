@@ -14,7 +14,7 @@
 
 usage() { echo "Usage: $0 -u <protocol> -p <prefix> -b <bucket> [-s <suffix>] [-i <ignore>] [-y UNSAFE]" 1>&2; exit 1; }
 
-while getopts ":u:p:b:s:i:y:d:m:l:e:" o; do
+while getopts ":u:p:b:s:i:y:d:m:l:e:n:" o; do
     case "${o}" in
         u)
             protocol=${OPTARG}
@@ -46,6 +46,9 @@ while getopts ":u:p:b:s:i:y:d:m:l:e:" o; do
         e)
             exclude=${OPTARG}
             ;;
+	n)
+	    numberdays=${OPTARG}
+	    ;;
     esac
 done
 shift $((OPTIND-1))
@@ -61,7 +64,7 @@ IFS=' ' read -r -a multiproducts <<< "$multiproduct"
 first_suffix="${suffixes[0]}"
 safety_arg=""
 
-
+current_date=$(date +%F)
 
 # index new datasets
 for i in "${!prefixes[@]}"; do
@@ -92,13 +95,29 @@ for i in "${!prefixes[@]}"; do
         else
             suffix_string="${suffixes[$i]}"
         fi
+        #Check if the number of days is empty string otherwise set default to 30 days
+	if [ -z "${numberdays}" ]; then
+	    number=30
+	else
+	    number=$numberdays
+	fi
 
         # renders list as " -s item -s item ..." using $@
         set -- $ignore
         set -- "${@/#/ -s }"
-
-        thredds-to-tar -c "${b}/${prefixes[$i]}" -t $suffix_string -w 8 $@ 
-        dc-index-from-tar --protocol "${protocol}" metadata.tar.gz ${exclude:+"--exclude-product"} ${exclude:+"$exclude"} ${ignorelineage:+"--ignore-lineage"}
+	if [ -n "${numberdays}" ]; then
+	   number=$numberdays
+	   until [ $number -lt 1 ]
+	   do
+	       processing_date=$(date -d "$current_date - $number days" +%F)
+	       thredds-to-tar -c "${b}/${prefixes[$i]}/${processing_date}" -t $suffix_string -w 8 $@
+               dc-index-from-tar --protocol "${protocol}" metadata.tar.gz ${exclude:+"--exclude-product"} ${exclude:+"$exclude"} ${ignorelineage:+"--ignore-lineage"}
+  	       ((number--))
+	   done
+	else
+           thredds-to-tar -c "${b}/${prefixes[$i]}" -t $suffix_string -w 8 $@ 
+           dc-index-from-tar --protocol "${protocol}" metadata.tar.gz ${exclude:+"--exclude-product"} ${exclude:+"$exclude"} ${ignorelineage:+"--ignore-lineage"}
+	fi
     fi
 done
 
