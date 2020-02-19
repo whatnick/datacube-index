@@ -1,4 +1,4 @@
-FROM opendatacube/wms:latest
+FROM opendatacube/ows:latest
 
 USER root
 

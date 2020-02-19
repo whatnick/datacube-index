@@ -2,7 +2,7 @@ version: "3"
 
 services:
   postgres:
-    image: postgres:10.3
+    image: postgres:11.5
     environment:
       - POSTGRES_DB=opendatacube
       - POSTGRES_PASSWORD=opendatacubepassword
@@ -14,7 +14,7 @@ services:
     build:
       context: ../../
     environment:
-      - WMS_CONFIG_URL=https://raw.githubusercontent.com/GeoscienceAustralia/dea-config/master/dev/services/wms/ows/wms_cfg.py
+      - WMS_CONFIG_URL=https://raw.githubusercontent.com/GeoscienceAustralia/dea-config/master/dev/services/wms/ows/ows_cfg.py
       - PRODUCT_URLS=https://raw.githubusercontent.com/GeoscienceAustralia/dea-config/master/dev/products/mangrove/product-definition.yaml
       - DC_S3_INDEX_BUCKET=dea-public-data
       - DC_S3_INDEX_PREFIX=mangrove_cover/-10_-18/
