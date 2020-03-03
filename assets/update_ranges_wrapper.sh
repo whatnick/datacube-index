@@ -13,4 +13,5 @@ indexing/update_ranges.sh \
 -m "$DC_RANGES_MULTIPRODUCT" \
 -l "$DC_IGNORE_LINEAGE" \
 -e "$DC_EXCLUDE_PRODUCT" \
--n "$DC_THREDDS_DAYS"
+-n "$DC_THREDDS_DAYS" \
+-o "$WMS_CONFIG_URL"
