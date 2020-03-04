@@ -128,6 +128,7 @@ done
 # download wms config from github raw location
 # TODO: Mount config from secondary docker container in pod
 if [ -z "$wms_config" ]; then
+    echo "Getting config from $wms_config"
     [[ "$wms_config" =~ ^http ]] && curl -o /code/datacube_ows/ows_cfg.py "$wms_config"
 fi
 
