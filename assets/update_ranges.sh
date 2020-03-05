@@ -86,7 +86,7 @@ for i in "${!prefixes[@]}"; do
 
     # Google Storage Bucket
     elif [ "${protocol}" == "gs" ]; then
-        gs-to-tar --bucket ${b} --prefix ${prefixes[$i]}
+        gs-to-tar --bucket "${b}" --prefix "${prefixes[$i]}"
         dc-index-from-tar --protocol "${protocol}" metadata.tar.gz ${exclude:+"--exclude-product"} ${exclude:+"$exclude"} ${ignorelineage:+"--ignore-lineage"}
     
     # NCI thredds server
@@ -107,19 +107,19 @@ for i in "${!prefixes[@]}"; do
 	fi
 
         # renders list as " -s item -s item ..." using $@
-        set -- $ignore
+        set -- "$ignore"
         set -- "${@/#/ -s }"
 	if [ -n "${numberdays}" ]; then
 	   number=$numberdays
-	   until [ $number -lt 1 ]
+	   until [ "$number" -lt 1 ]
 	   do
 	       processing_date=$(date -d "$current_date - $number days" +%F)
-	       thredds-to-tar -c "${b}/${prefixes[$i]}/${processing_date}" -t $suffix_string -w 8 $@
+	       thredds-to-tar -c "${b}/${prefixes[$i]}/${processing_date}" -t "$suffix_string" -w 8 "$@"
                dc-index-from-tar --protocol "${protocol}" metadata.tar.gz ${exclude:+"--exclude-product"} ${exclude:+"$exclude"} ${ignorelineage:+"--ignore-lineage"}
   	       ((number--))
 	   done
 	else
-           thredds-to-tar -c "${b}/${prefixes[$i]}" -t $suffix_string -w 8 $@ 
+           thredds-to-tar -c "${b}/${prefixes[$i]}" -t "$suffix_string" -w 8 "$@" 
            dc-index-from-tar --protocol "${protocol}" metadata.tar.gz ${exclude:+"--exclude-product"} ${exclude:+"$exclude"} ${ignorelineage:+"--ignore-lineage"}
 	fi
     fi
@@ -127,9 +127,10 @@ done
 
 # download wms config from github raw location
 # TODO: Mount config from secondary docker container in pod
+wms_config_file=/code/datacube_ows/ows_cfg.py
 if [ -z "$wms_config" ]; then
     echo "Getting config from $wms_config"
-    [[ "$wms_config" =~ ^http ]] && curl -o /code/datacube_ows/ows_cfg.py "$wms_config"
+    [[ "$wms_config" =~ ^http ]] && ! test -f "$wms_config_file" && curl -o "$wms_config_file" "$wms_config"
 fi
 
 # update ranges in wms database
