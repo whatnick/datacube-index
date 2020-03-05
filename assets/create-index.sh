@@ -32,10 +32,12 @@ wms_config_file=/code/datacube_ows/ows_cfg.py
 echo "Getting config from $WMS_CONFIG_URL"
 curl -o "$wms_config_file" "$WMS_CONFIG_URL"
 test -f "$wms_config_file" && echo "Found OWS Config"
-if [ -z "$WMS_CONFIG_URL" ]; then
-    echo "Getting config from $WMS_CONFIG_URL"
-    [[ "$WMS_CONFIG_URL" =~ ^http ]] && ! test -f "$wms_config_file" && curl -o "$wms_config_file" "$WMS_CONFIG_URL"
-fi
+# TODO: Make the above always executed steps conditional
+# if [ -z "$WMS_CONFIG_URL" ]; then
+#    echo "Getting config from $WMS_CONFIG_URL"
+#    [[ "$WMS_CONFIG_URL" =~ ^http ]] && ! test -f "$wms_config_file" && curl -o "$wms_config_file" "$WMS_CONFIG_URL"
+# fi
+
 cd ..
 PYTHONPATH=. python3 ./update_ranges.py --schema 2>&1 --role "$DB_ROLE" || echo "Warning: Can't create schema"
 
