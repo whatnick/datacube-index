@@ -38,10 +38,15 @@ test -f "$wms_config_file" && echo "Found OWS Config"
 #    [[ "$WMS_CONFIG_URL" =~ ^http ]] && ! test -f "$wms_config_file" && curl -o "$wms_config_file" "$WMS_CONFIG_URL"
 # fi
 
+# Run OWS Schema creation / prep
+echo "Creating OWS Schema"
+curdir=$(pwd)
 cd ..
 PYTHONPATH=. python3 ./update_ranges.py --schema 2>&1 --role "$DB_ROLE" || echo "Warning: Can't create schema"
 
 # Run index
+echo "Running OWS Update Ranges"
+cd "$curdir"
 indexing/update_ranges_wrapper.sh
 
 set +e
