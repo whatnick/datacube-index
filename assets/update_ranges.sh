@@ -50,9 +50,12 @@ while getopts ":u:p:b:s:i:y:d:m:l:e:n:o:" o; do
         e)
             exclude=${OPTARG}
             ;;
-	n)
-	    numberdays=${OPTARG}
-	    ;;
+        n)
+            numberdays=${OPTARG}
+            ;;
+        *)
+            echo "Invalid option(s)"
+            ;;
     esac
 done
 shift $((OPTIND-1))
@@ -114,12 +117,12 @@ for i in "${!prefixes[@]}"; do
 	   until [ "$number" -lt 1 ]
 	   do
 	       processing_date=$(date -d "$current_date - $number days" +%F)
-	       thredds-to-tar -c "${b}/${prefixes[$i]}/${processing_date}" -t "$suffix_string" -w 8 "$@"
+	       thredds-to-tar -c "${b}/${prefixes[$i]}/${processing_date}" -t $suffix_string -w 8 $@
                dc-index-from-tar --protocol "${protocol}" metadata.tar.gz ${exclude:+"--exclude-product"} ${exclude:+"$exclude"} ${ignorelineage:+"--ignore-lineage"}
   	       ((number--))
 	   done
 	else
-           thredds-to-tar -c "${b}/${prefixes[$i]}" -t "$suffix_string" -w 8 "$@" 
+           thredds-to-tar -c "${b}/${prefixes[$i]}" -t $suffix_string -w 8 $@ 
            dc-index-from-tar --protocol "${protocol}" metadata.tar.gz ${exclude:+"--exclude-product"} ${exclude:+"$exclude"} ${ignorelineage:+"--ignore-lineage"}
 	fi
     fi
