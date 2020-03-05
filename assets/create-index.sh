@@ -29,6 +29,7 @@ add_products
 
 # Generate WMS specific config
 wms_config_file=/code/datacube_ows/ows_cfg.py
+curl -o "$wms_config_file" "$WMS_CONFIG_URL"
 if [ -z "$WMS_CONFIG_URL" ]; then
     echo "Getting config from $WMS_CONFIG_URL"
     [[ "$WMS_CONFIG_URL" =~ ^http ]] && ! test -f "$wms_config_file" && curl -o "$wms_config_file" "$WMS_CONFIG_URL"
