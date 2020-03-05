@@ -89,7 +89,7 @@ for i in "${!prefixes[@]}"; do
 
     # Google Storage Bucket
     elif [ "${protocol}" == "gs" ]; then
-        gs-to-tar --bucket "${b}" --prefix "${prefixes[$i]}"
+        gs-to-tar --bucket ${b} --prefix ${prefixes[$i]}
         dc-index-from-tar --protocol "${protocol}" metadata.tar.gz ${exclude:+"--exclude-product"} ${exclude:+"$exclude"} ${ignorelineage:+"--ignore-lineage"}
     
     # NCI thredds server
@@ -110,11 +110,11 @@ for i in "${!prefixes[@]}"; do
 	fi
 
         # renders list as " -s item -s item ..." using $@
-        set -- "$ignore"
-        set -- "${@/#/ -s }"
+        set -- $ignore
+        set -- ${@/#/ -s }
 	if [ -n "${numberdays}" ]; then
 	   number=$numberdays
-	   until [ "$number" -lt 1 ]
+	   until [ $number -lt 1 ]
 	   do
 	       processing_date=$(date -d "$current_date - $number days" +%F)
 	       thredds-to-tar -c "${b}/${prefixes[$i]}/${processing_date}" -t $suffix_string -w 8 $@
