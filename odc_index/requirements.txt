@@ -1,0 +1,6 @@
+aiobotocore[awscli,boto3]
+datacube
+odc-index
+odc-aws
+odc-aio
+odc-apps-cloud
