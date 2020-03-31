@@ -24,21 +24,20 @@ RUN apt-get update \
 RUN mkdir -p /code
 ADD . /code
 
-# Environment can be whatever is supported by setup.py
-# so, either deployment, test
-ARG ENVIRONMENT=deployment
-RUN echo "Environment is: $ENVIRONMENT"
-
 # Install Python requirements 
-RUN /env/bin/pip install --extra-index-url https://packages.dea.ga.gov.au/ -r /code/odc_index/requirements.txt
-RUN /env/bin/pip install -r /code/tests/requirements.txt
-RUN /env/bin/pip install -r /code/assets/requirements.txt
+RUN /env/bin/pip install --extra-index-url https://packages.dea.ga.gov.au/ \
+-r /code/odc_index/requirements.txt -r /code/tests/requirements.txt \
+-r /code/assets/requirements.txt
+
+# Install the local package
+RUN /env/bin/pip install /code
 
 FROM opendatacube/geobase:runner
 COPY --from=env_builder /env /env
 
 ENV PATH="/env/bin:${PATH}"
-
+ENV LC_ALL=C.UTF-8
+ENV LANG=C.UTF-8
 
 # Install dea proto for indexing tools
 COPY assets/update_ranges.sh /code/index/indexing/update_ranges.sh

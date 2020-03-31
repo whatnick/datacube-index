@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Build S3 iterators using odc-tools
 and index datasets found into RDS
 """
