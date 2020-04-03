@@ -36,3 +36,11 @@ jobs:
     - name: Build Docker
       run: |
         docker build -t datacube-index .
+
+    - name: Run Dockerized Tests
+      run: |
+        docker-compose up -d
+        docker-compose run dc-index datacube system init
+        docker-compose run dc-index datacube system check
+        docker-compose run dc-index s3-to-dc s3://cemp_insar/insar/displacement/alos//**/*.yaml cemp-insar-alos-displacement
+        docker-compose down

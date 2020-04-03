@@ -2,5 +2,5 @@ aiobotocore[awscli,boto3]
 datacube
 odc-index
 odc-aws
-odc-aio
+git+https://github.com/whatnick/odc-tools@feat/refactor-s3-find#egg=odc-aio&subdirectory=libs/aio
 odc-apps-cloud
