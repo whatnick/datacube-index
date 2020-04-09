@@ -5,8 +5,7 @@ and index datasets found into RDS
 import sys
 
 import click
-from odc.aio import S3Fetcher
-from odc.aws._find import parse_query, norm_predicate
+from odc.aio import s3_find_glob
 
 
 @click.command("s3-to-dc")
@@ -15,13 +14,11 @@ from odc.aws._find import parse_query, norm_predicate
 def cli(uri, product):
     """ Iterate through files in an S3 bucket and add them to datacube"""
     # Get a generator from supplied S3 Uri for metadata definitions
-    try:
-        qq = parse_query(uri)
-    except ValueError as e:
-        click.echo(str(e), err=True)
-        sys.exit(1)
+    s3_yaml_stream = s3_find_glob(uri, False)
 
     # Consume generator to add YAML's to Datacube
+    for yaml in s3_yaml_stream:
+        print(yaml.url)
 
 
 if __name__ == "__main__":

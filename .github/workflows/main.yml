@@ -7,6 +7,9 @@ on:
       - 'odc_index/**'
       - 'tests/**'
       - '.github/**'
+      - 'Dockerfile'
+      - 'docker-compose.yml'
+      - 'requirements-*.txt'
 
 
 jobs:
@@ -38,9 +41,12 @@ jobs:
         docker build -t datacube-index .
 
     - name: Run Dockerized Tests
+      timeout-minutes: 10
       run: |
         docker-compose up -d
         docker-compose run dc-index datacube system init
         docker-compose run dc-index datacube system check
-        docker-compose run dc-index s3-to-dc s3://cemp_insar/insar/displacement/alos//**/*.yaml cemp-insar-alos-displacement
+        docker-compose run dc-index datacube metadata add https://raw.githubusercontent.com/GeoscienceAustralia/digitalearthau/develop/digitalearthau/config/eo3/eo3.odc-type.yaml
+        docker-compose run dc-index datacube product add https://raw.githubusercontent.com/GeoscienceAustralia/digitalearthau/develop/digitalearthau/config/products/cemp_insar_alos_displacement.yaml
+        docker-compose run dc-index s3-to-dc s3://dea-public-data/cemp_insar/insar/displacement/alos//**/*.yaml cemp_insar_alos_displacement
         docker-compose down

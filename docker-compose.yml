@@ -57,6 +57,7 @@ services:
       - DB_PASSWORD=opendatacubepassword
       - DB_DATABASE=postgres
       - DB_PORT=5432
+      - AWS_DEFAULT_REGION=ap-southeast-2
 
 volumes: 
   data1-1:
