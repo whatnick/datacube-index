@@ -35,7 +35,7 @@ def cli(uri, product):
     dc = Datacube()
     result_stream = dump_to_odc(fetcher(s3_url_stream), dc)
     for result in result_stream:
-        ds,err = result
+        ds, err = result
         if err is not None:
             logging.error(err)
         else:
