@@ -3,16 +3,18 @@
 and index datasets found into RDS
 """
 import sys
+import logging
 
 import click
 from odc.aio import s3_find_glob, S3Fetcher
 from odc.index import from_yaml_doc_stream
 from datacube import Datacube
 
-def dump_to_odc(data_stream, index):
+
+def dump_to_odc(data_stream, dc):
     # TODO: Get right combination of flags for **kwargs in low validation/no-lineage mode
     expand_stream = ((d.url, d.data) for d in data_stream if d.data is not None)
-    return from_yaml_doc_stream(expand_stream, index, transform=None)
+    return from_yaml_doc_stream(expand_stream, dc.index, transform=None)
 
 
 @click.command("s3-to-dc")
@@ -25,7 +27,7 @@ def cli(uri, product):
 
     # TODO: Share Fetcher
     s3_obj_stream = s3_find_glob(uri, False)
-    
+
     # Extract URL's from output of iterator before passing to Fetcher
     s3_url_stream = (o.url for o in s3_obj_stream)
 
@@ -33,7 +35,11 @@ def cli(uri, product):
     dc = Datacube()
     result_stream = dump_to_odc(fetcher(s3_url_stream), dc)
     for result in result_stream:
-        print(result)
+        ds,err = result
+        if err is not None:
+            logging.error(err)
+        else:
+            logging.info(ds)
 
 
 if __name__ == "__main__":
