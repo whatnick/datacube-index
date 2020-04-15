@@ -11,10 +11,31 @@ from odc.index import from_yaml_doc_stream
 from datacube import Datacube
 
 
-def dump_to_odc(data_stream, dc):
+def dump_to_odc(data_stream , dc : Datacube) -> tuple:
     # TODO: Get right combination of flags for **kwargs in low validation/no-lineage mode
     expand_stream = ((d.url, d.data) for d in data_stream if d.data is not None)
-    return from_yaml_doc_stream(expand_stream, dc.index, transform=None)
+    ds_stream = from_yaml_doc_stream(expand_stream, dc.index, transform=None)
+    ds_added = 0
+    ds_failed = 0
+    # Consume chained streams to DB
+    for result in ds_stream:
+        ds, err = result
+        if err is not None:
+            logging.error(err)
+            ds_failed += 1
+        else:
+            logging.info(ds)
+            # TODO: Potentially wrap this in transactions and batch to DB
+            # TODO: Capture UUID's from YAML and perform a bulk has
+            try:
+                dc.index.datasets.add(ds)
+                ds_added += 1
+            except Exception as e:
+                logging.error(e)
+                ds_failed += 1
+
+    return ds_added, ds_failed
+    
 
 
 @click.command("s3-to-dc")
@@ -31,15 +52,13 @@ def cli(uri, product):
     # Extract URL's from output of iterator before passing to Fetcher
     s3_url_stream = (o.url for o in s3_obj_stream)
 
+    # TODO: Capture S3 URL's in batches and perform bulk_location_has
+
     # Consume generator and fetch YAML's
     dc = Datacube()
-    result_stream = dump_to_odc(fetcher(s3_url_stream), dc)
-    for result in result_stream:
-        ds, err = result
-        if err is not None:
-            logging.error(err)
-        else:
-            logging.info(ds)
+    added, failed = dump_to_odc(fetcher(s3_url_stream), dc)
+    print(f'Added {added} Datasets, Failed {failed} Datasets')
+    
 
 
 if __name__ == "__main__":
