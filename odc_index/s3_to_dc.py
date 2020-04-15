@@ -4,6 +4,7 @@ and index datasets found into RDS
 """
 import sys
 import logging
+from typing import Tuple
 
 import click
 from odc.aio import s3_find_glob, S3Fetcher
@@ -11,9 +12,11 @@ from odc.index import from_yaml_doc_stream
 from datacube import Datacube
 
 
-def dump_to_odc(data_stream , dc : Datacube) -> tuple:
+def dump_to_odc(data_stream , dc : Datacube) -> Tuple[int,int]:
     # TODO: Get right combination of flags for **kwargs in low validation/no-lineage mode
     expand_stream = ((d.url, d.data) for d in data_stream if d.data is not None)
+
+    # TODO: Apply the eo3 transform
     ds_stream = from_yaml_doc_stream(expand_stream, dc.index, transform=None)
     ds_added = 0
     ds_failed = 0
@@ -43,6 +46,8 @@ def dump_to_odc(data_stream , dc : Datacube) -> tuple:
 @click.argument("product", type=str, nargs=1)
 def cli(uri, product):
     """ Iterate through files in an S3 bucket and add them to datacube"""
+    # TODO: Have eo3 argument OR autodetect
+
     # Get a generator from supplied S3 Uri for metadata definitions
     fetcher = S3Fetcher()
 
