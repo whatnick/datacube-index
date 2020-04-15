@@ -12,7 +12,7 @@ from odc.index import from_yaml_doc_stream
 from datacube import Datacube
 
 
-def dump_to_odc(data_stream , dc : Datacube) -> Tuple[int,int]:
+def dump_to_odc(data_stream, dc: Datacube) -> Tuple[int, int]:
     # TODO: Get right combination of flags for **kwargs in low validation/no-lineage mode
     expand_stream = ((d.url, d.data) for d in data_stream if d.data is not None)
 
@@ -38,7 +38,6 @@ def dump_to_odc(data_stream , dc : Datacube) -> Tuple[int,int]:
                 ds_failed += 1
 
     return ds_added, ds_failed
-    
 
 
 @click.command("s3-to-dc")
@@ -62,8 +61,7 @@ def cli(uri, product):
     # Consume generator and fetch YAML's
     dc = Datacube()
     added, failed = dump_to_odc(fetcher(s3_url_stream), dc)
-    print(f'Added {added} Datasets, Failed {failed} Datasets')
-    
+    print(f"Added {added} Datasets, Failed {failed} Datasets")
 
 
 if __name__ == "__main__":
