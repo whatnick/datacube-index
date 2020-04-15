@@ -12,12 +12,15 @@ from odc.index import from_yaml_doc_stream
 from datacube import Datacube
 
 
-def dump_to_odc(data_stream, dc: Datacube) -> Tuple[int, int]:
+def dump_to_odc(data_stream, dc: Datacube, product: str) -> Tuple[int, int]:
     # TODO: Get right combination of flags for **kwargs in low validation/no-lineage mode
     expand_stream = ((d.url, d.data) for d in data_stream if d.data is not None)
 
     # TODO: Apply the eo3 transform
-    ds_stream = from_yaml_doc_stream(expand_stream, dc.index, transform=None)
+    ds_stream = from_yaml_doc_stream(expand_stream, dc.index, transform=None,
+                                     products=[product],
+                                     fail_on_missing_lineage=True,
+                                     verify_lineage=False)
     ds_added = 0
     ds_failed = 0
     # Consume chained streams to DB
@@ -60,7 +63,7 @@ def cli(uri, product):
 
     # Consume generator and fetch YAML's
     dc = Datacube()
-    added, failed = dump_to_odc(fetcher(s3_url_stream), dc)
+    added, failed = dump_to_odc(fetcher(s3_url_stream), product, dc)
     print(f"Added {added} Datasets, Failed {failed} Datasets")
 
 
