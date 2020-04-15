@@ -17,10 +17,14 @@ def dump_to_odc(data_stream, dc: Datacube, product: str) -> Tuple[int, int]:
     expand_stream = ((d.url, d.data) for d in data_stream if d.data is not None)
 
     # TODO: Apply the eo3 transform
-    ds_stream = from_yaml_doc_stream(expand_stream, dc.index, transform=None,
-                                     products=[product],
-                                     fail_on_missing_lineage=True,
-                                     verify_lineage=False)
+    ds_stream = from_yaml_doc_stream(
+        expand_stream,
+        dc.index,
+        transform=None,
+        products=[product],
+        fail_on_missing_lineage=True,
+        verify_lineage=False,
+    )
     ds_added = 0
     ds_failed = 0
     # Consume chained streams to DB
