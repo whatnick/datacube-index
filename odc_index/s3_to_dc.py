@@ -17,8 +17,7 @@ def cli(uri, product):
     s3_yaml_stream = s3_find_glob(uri, False)
 
     # Consume generator to add YAML's to Datacube
-    for yaml in s3_yaml_stream:
-        print(yaml.url)
+    s3_uri_stream = (o.url for o in s3_yaml_stream)
 
 
 if __name__ == "__main__":
