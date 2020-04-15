@@ -54,5 +54,5 @@ jobs:
         docker-compose run dc-index datacube product add https://raw.githubusercontent.com/GeoscienceAustralia/digitalearthau/develop/digitalearthau/config/products/cemp_insar_alos_displacement.yaml
         docker-compose run dc-index s3-to-dc s3://dea-public-data/cemp_insar/insar/displacement/alos//**/*.yaml cemp_insar_alos_displacement
         echo "Checking Indexed Datasets Count"
-        docker-compose exec dc-index psql -U postgres -c "SELECT count(*) from agdc.dataset"
+        docker-compose exec dc-db psql -U postgres -c "SELECT count(*) from agdc.dataset"
         docker-compose down
