@@ -1,0 +1,54 @@
+name : Push Docker Image
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - master
+
+  release:
+    types: [created]
+
+env:
+  IMAGE_NAME: "${{ secrets.DOCKER_ORG }}/datacube-index"
+
+jobs:
+  push:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      if: github.event.pull_request.merged || contains(github.ref, 'odc-index-')
+      uses: actions/checkout@v1
+      with:
+        fetch-depth: 0
+        ref: master
+
+    - name: Get tag for this build if it exists
+      if: contains(github.ref, 'odc-index-')
+      run: |
+        echo ::set-env name=RELEASE::${GITHUB_REF/refs\/tags\/odc-index-/}
+        echo $RELEASE
+
+    - name: Get git commit hash for merged PR's
+      if: github.event.pull_request.merged
+      run: |
+        echo ::set-env name=GITHASH::$(git rev-parse --short "$GITHUB_SHA")
+        echo $GITHASH
+
+    - name: Build and Push latest Docker Image for Release
+      uses: whoan/docker-build-with-cache-action@v4
+      if: contains(github.ref, 'odc-index-')
+      with:
+        image_name: ${{ env.IMAGE_NAME }}
+        username: "${{ secrets.DOCKER_USER }}"
+        password: "${{ secrets.DOCKER_PASS }}"
+        image_tag: ${{ env.RELEASE }}
+
+    - name: Build and Push unstable Docker Image from PR
+      uses: whoan/docker-build-with-cache-action@v4
+      if: github.event.pull_request.merged
+      with:
+        image_name: ${{ env.IMAGE_NAME }}
+        username: "${{ secrets.DOCKER_USER }}"
+        password: "${{ secrets.DOCKER_PASS }}"
+        image_tag: "unstable-${{ env.GITHASH }}"
