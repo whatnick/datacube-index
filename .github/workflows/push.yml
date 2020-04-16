@@ -26,13 +26,13 @@ jobs:
     - name: Get tag for this build if it exists
       if: contains(github.ref, 'odc-index-')
       run: |
-        echo ::set-output name=RELEASE::${GITHUB_REF/refs\/tags\/odc-index-/}
+        echo ::set-env name=RELEASE::${GITHUB_REF/refs\/tags\/odc-index-/}
         echo $RELEASE
 
-    - name: Get git commit has for merged PR's
+    - name: Get git commit hash for merged PR's
       if: github.event.pull_request.merged
       run: |
-        echo ::set-output name=GITHASH::$(git rev-parse --short "$GITHUB_SHA")
+        echo ::set-env name=GITHASH::$(git rev-parse --short "$GITHUB_SHA")
         echo $GITHASH
 
     - name: Build and Push latest Docker Image for Release
