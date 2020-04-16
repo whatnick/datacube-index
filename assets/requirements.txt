@@ -1,0 +1,3 @@
+google-cloud-storage
+thredds_crawler
+https://github.com/opendatacube/datacube-ows/archive/0.13.1.zip

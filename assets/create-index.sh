@@ -16,7 +16,7 @@ function add_products {
 
     for U in "${URLS[@]}"
     do
-        wget $U -O firsttime/products/$(cat /dev/urandom | tr -cd 'a-f0-9' | head -c 16).yaml
+        wget "$U" -O firsttime/products/"$(tr -cd 'a-f0-9' < /dev/urandom | head -c 16)".yaml
     done
 
     for file in firsttime/products/*
@@ -28,9 +28,25 @@ function add_products {
 add_products
 
 # Generate WMS specific config
-python3 ../update_ranges.py --schema 2>&1 --role $DB_ROLE || echo "Warning: Can't create schema"
+wms_config_file=/code/datacube_ows/ows_cfg.py
+echo "Getting config from $WMS_CONFIG_URL"
+curl -o "$wms_config_file" "$WMS_CONFIG_URL"
+test -f "$wms_config_file" && echo "Found OWS Config"
+# TODO: Make the above always executed steps conditional
+# if [ -z "$WMS_CONFIG_URL" ]; then
+#    echo "Getting config from $WMS_CONFIG_URL"
+#    [[ "$WMS_CONFIG_URL" =~ ^http ]] && ! test -f "$wms_config_file" && curl -o "$wms_config_file" "$WMS_CONFIG_URL"
+# fi
+
+# Run OWS Schema creation / prep
+echo "Creating OWS Schema"
+curdir=$(pwd)
+cd ..
+PYTHONPATH=. python3 ./update_ranges.py --schema 2>&1 --role "$DB_ROLE" || echo "Warning: Can't create schema"
 
 # Run index
+echo "Running OWS Update Ranges"
+cd "$curdir"
 indexing/update_ranges_wrapper.sh
 
 set +e

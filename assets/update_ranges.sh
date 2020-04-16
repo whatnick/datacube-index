@@ -10,12 +10,16 @@
 #                                         if only one provided, suffix will be applied to ALL prefixes
 #        -y UNSAFE: If set script will use unsafe YAML reading. Only set if you fully trust source
 #        -d product to update in database (optional)
+#        -o WMS config location (if HTTP location is passed download it via curl)
 # e.g. ./update_ranges -b dea-public-data -p "L2/sentinel-2-nrt/S2MSIARD/2018 L2/sentinel-2-nrt/2017"
 
 usage() { echo "Usage: $0 -u <protocol> -p <prefix> -b <bucket> [-s <suffix>] [-i <ignore>] [-y UNSAFE]" 1>&2; exit 1; }
 
-while getopts ":u:p:b:s:i:y:d:m:l:e:n:" o; do
+while getopts ":u:p:b:s:i:y:d:m:l:e:n:o:" o; do
     case "${o}" in
+        o)
+            wms_config=${OPTARG}
+            ;;
         u)
             protocol=${OPTARG}
             ;;
@@ -46,9 +50,12 @@ while getopts ":u:p:b:s:i:y:d:m:l:e:n:" o; do
         e)
             exclude=${OPTARG}
             ;;
-	n)
-	    numberdays=${OPTARG}
-	    ;;
+        n)
+            numberdays=${OPTARG}
+            ;;
+        *)
+            echo "Invalid option(s)"
+            ;;
     esac
 done
 shift $((OPTIND-1))
@@ -104,7 +111,7 @@ for i in "${!prefixes[@]}"; do
 
         # renders list as " -s item -s item ..." using $@
         set -- $ignore
-        set -- "${@/#/ -s }"
+        set -- ${@/#/ -s }
 	if [ -n "${numberdays}" ]; then
 	   number=$numberdays
 	   until [ $number -lt 1 ]
@@ -120,6 +127,14 @@ for i in "${!prefixes[@]}"; do
 	fi
     fi
 done
+
+# download wms config from github raw location
+# TODO: Mount config from secondary docker container in pod
+wms_config_file=/code/datacube_ows/ows_cfg.py
+if [ -z "$wms_config" ]; then
+    echo "Getting config from $wms_config"
+    [[ "$wms_config" =~ ^http ]] && ! test -f "$wms_config_file" && curl -o "$wms_config_file" "$wms_config"
+fi
 
 # update ranges in wms database
 if [ -z "$product" ]; then

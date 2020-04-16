@@ -1,0 +1,70 @@
+version: '3.7'
+
+services:
+  # Start docker containers for Minio to mock S3
+  minio1:
+    image: minio/minio:RELEASE.2020-03-25T07-03-04Z
+    volumes:
+      - data1-1:/data1
+      - data1-2:/data2
+    ports:
+      - "9001:9000"
+    environment:
+      MINIO_ACCESS_KEY: minio
+      MINIO_SECRET_KEY: minio123
+    command: server http://minio{1...2}/data{1...2}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  minio2:
+    image: minio/minio:RELEASE.2020-03-25T07-03-04Z
+    volumes:
+      - data2-1:/data1
+      - data2-2:/data2
+    ports:
+      - "9002:9000"
+    environment:
+      MINIO_ACCESS_KEY: minio
+      MINIO_SECRET_KEY: minio123
+    command: server http://minio{1...2}/data{1...2}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  # Start docker container for PostgreSQL to mock RDS
+  dc-db:
+    image: postgres:11.5-alpine
+    ports:
+      - "5434:5432"
+    environment:
+      POSTGRES_PASSWORD: opendatacubepassword
+    restart: always
+
+
+  # Start docker container for Datacube-Index
+  dc-index:
+    image: datacube-index
+  # TODO: Pass Minio credentials
+  # TODO: Pass PostgreSQL credentials
+    environment:
+      - DB_HOSTNAME=dc-db
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=opendatacubepassword
+      - DB_DATABASE=postgres
+      - DB_PORT=5432
+      - AWS_DEFAULT_REGION=ap-southeast-2
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+
+volumes: 
+  data1-1:
+  data1-2:
+  data2-1:
+  data2-2:
+
+    

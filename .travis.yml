@@ -10,6 +10,7 @@ jobs:
   include:
     - stage: test
       script:
+        - for a in $(ls assets/*.sh); do shellcheck $a;done
         - docker build -t opendatacube/datacube-index:latest .
     - stage: build
       if: (branch = master OR (tag = branch)) AND type = push
