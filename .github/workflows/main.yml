@@ -1,4 +1,4 @@
-name : build
+name : Lint and Test Code
 
 on:
   push:
@@ -56,3 +56,4 @@ jobs:
         echo "Checking Indexed Datasets Count"
         docker-compose exec -T dc-db psql -U postgres -c "SELECT count(*) from agdc.dataset"
         docker-compose down
+    
