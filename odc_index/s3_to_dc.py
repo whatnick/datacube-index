@@ -67,7 +67,7 @@ def cli(uri, product):
 
     # Consume generator and fetch YAML's
     dc = Datacube()
-    added, failed = dump_to_odc(fetcher(s3_url_stream), product, dc)
+    added, failed = dump_to_odc(fetcher(s3_url_stream), dc, product)
     print(f"Added {added} Datasets, Failed {failed} Datasets")
 
 
