@@ -1,5 +1,5 @@
-.. image:: https://img.shields.io/travis/opendatacube/datacube-index.svg
-        :target: https://travis-ci.org/opendatacube/datacube-index
+.. image:: https://github.com/opendatacube/datacube-index/workflows/Lint%20and%20Test%20Code/badge.svg?branch=master
+        :target: https://github.com/opendatacube/datacube-index/actions?query=workflow%3A%22Lint+and+Test+Code%22
 
 This code will generate a docker image that is used to index data into a datacube using `odc-tools <https://github.com/opendatacube/odc-tools>`_.
 It has code to perform the follow steps:
