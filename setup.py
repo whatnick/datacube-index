@@ -18,6 +18,7 @@ setuptools.setup(
     entry_points="""
         [console_scripts]
         s3-to-dc=odc_index.s3_to_dc:cli
+        thredds-to-dc=odc_index.thredds_to_dc:cli
     """,
     classifiers=[
         "Programming Language :: Python :: 3",

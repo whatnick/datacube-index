@@ -40,7 +40,7 @@ jobs:
       run: |
         docker build -t datacube-index .
 
-    - name: Run Dockerized Tests
+    - name: Run Dockerized Tests for S3
       timeout-minutes: 10
       shell: bash
       env:
@@ -56,4 +56,20 @@ jobs:
         echo "Checking Indexed Datasets Count"
         docker-compose exec -T dc-db psql -U postgres -c "SELECT count(*) from agdc.dataset"
         docker-compose down
-    
+
+    - name: Run Dockerized Tests for Thredds
+      timeout-minutes: 10
+      shell: bash
+      env:
+        AWS_ACCESS_KEY_ID : ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY : ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      run: |
+        docker-compose up -d
+        docker-compose run dc-index datacube system init
+        docker-compose run dc-index datacube system check
+        docker-compose run dc-index datacube metadata add https://raw.githubusercontent.com/GeoscienceAustralia/digitalearthau/develop/digitalearthau/config/metadata-types.odc-type.yaml || true
+        docker-compose run dc-index datacube product add https://raw.githubusercontent.com/GeoscienceAustralia/digitalearthau/develop/digitalearthau/config/products/ga_s2_ard.odc-product.yaml
+        docker-compose run dc-index thredds-to-dc http://dapds00.nci.org.au/thredds/catalog/if87/2018-11-29/ s2a_ard_granule
+        echo "Checking Indexed Datasets Count"
+        docker-compose exec -T dc-db psql -U postgres -c "SELECT count(*) from agdc.dataset"
+        docker-compose down
