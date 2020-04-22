@@ -6,6 +6,10 @@ on:
     branches:
       - master
 
+  push:
+    branches:
+      - master
+
   release:
     types: [created]
 
@@ -29,8 +33,7 @@ jobs:
         echo ::set-env name=RELEASE::${GITHUB_REF/refs\/tags\/odc-index-/}
         echo $RELEASE
 
-    - name: Get git commit hash for merged PR's
-      if: github.event.pull_request.merged
+    - name: Get git commit hash for merged PR's / Push to master
       run: |
         echo ::set-env name=GITHASH::$(git rev-parse --short "$GITHUB_SHA")
         echo $GITHASH
@@ -44,9 +47,9 @@ jobs:
         password: "${{ secrets.DOCKER_PASS }}"
         image_tag: ${{ env.RELEASE }}
 
-    - name: Build and Push unstable Docker Image from PR
+    - name: Build and Push unstable Docker Image from PR / Push to Master
+      continue-on-error: true
       uses: whoan/docker-build-with-cache-action@v4
-      if: github.event.pull_request.merged
       with:
         image_name: ${{ env.IMAGE_NAME }}
         username: "${{ secrets.DOCKER_USER }}"
