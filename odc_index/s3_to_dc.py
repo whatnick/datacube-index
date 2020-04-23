@@ -12,18 +12,13 @@ from odc.index import from_yaml_doc_stream
 from datacube import Datacube
 
 
-def dump_to_odc(data_stream, dc: Datacube, product: str) -> Tuple[int, int]:
+def dump_to_odc(data_stream, dc: Datacube, products: list, **kwargs) -> Tuple[int, int]:
     # TODO: Get right combination of flags for **kwargs in low validation/no-lineage mode
     expand_stream = ((d.url, d.data) for d in data_stream if d.data is not None)
 
     # TODO: Apply the eo3 transform
     ds_stream = from_yaml_doc_stream(
-        expand_stream,
-        dc.index,
-        transform=None,
-        products=[product],
-        fail_on_missing_lineage=True,
-        verify_lineage=False,
+        expand_stream, dc.index, transform=None, products=products, **kwargs
     )
     ds_added = 0
     ds_failed = 0
@@ -48,9 +43,30 @@ def dump_to_odc(data_stream, dc: Datacube, product: str) -> Tuple[int, int]:
 
 
 @click.command("s3-to-dc")
+@click.option(
+    "--skip-lineage",
+    is_flag=True,
+    default=False,
+    help="Default is not to skip lineage. Set to skip lineage altogether.",
+)
+@click.option(
+    "--fail-on-missing-lineage/--auto-add-lineage",
+    is_flag=True,
+    default=True,
+    help=(
+        "Default is to fail if lineage documents not present in the database. "
+        "Set auto add to try to index lineage documents."
+    ),
+)
+@click.option(
+    "--verify-lineage",
+    is_flag=True,
+    default=False,
+    help="Default is no verification. Set to verify parent dataset definitions.",
+)
 @click.argument("uri", type=str, nargs=1)
-@click.argument("product", type=str, nargs=1)
-def cli(uri, product):
+@click.argument("product", type=str, nargs=-1)
+def cli(skip_lineage, fail_on_missing_lineage, verify_lineage, uri, product):
     """ Iterate through files in an S3 bucket and add them to datacube"""
     # TODO: Have eo3 argument OR autodetect
 
@@ -67,7 +83,15 @@ def cli(uri, product):
 
     # Consume generator and fetch YAML's
     dc = Datacube()
-    added, failed = dump_to_odc(fetcher(s3_url_stream), dc, product)
+    added, failed = dump_to_odc(
+        fetcher(s3_url_stream),
+        dc,
+        product,
+        skip_lineage=skip_lineage,
+        fail_on_missing_lineage=fail_on_missing_lineage,
+        verify_lineage=verify_lineage,
+    )
+
     print(f"Added {added} Datasets, Failed {failed} Datasets")
 
 

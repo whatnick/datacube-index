@@ -11,18 +11,13 @@ from odc.index import from_yaml_doc_stream
 from datacube import Datacube
 
 
-def dump_list_to_odc(yaml_content_list: list, dc: Datacube, product: str):
+def dump_list_to_odc(yaml_content_list: list, dc: Datacube, products: list, **kwargs):
     expand_stream = (
         ("https://" + d[1], d[0]) for d in yaml_content_list if d[0] is not None
     )
 
     ds_stream = from_yaml_doc_stream(
-        expand_stream,
-        dc.index,
-        transform=None,
-        products=[product],
-        fail_on_missing_lineage=False,
-        verify_lineage=False,
+        expand_stream, dc.index, transform=None, products=products, **kwargs
     )
     ds_added = 0
     ds_failed = 0
@@ -47,9 +42,30 @@ def dump_list_to_odc(yaml_content_list: list, dc: Datacube, product: str):
 
 
 @click.command("thredds-to-dc")
+@click.option(
+    "--skip-lineage",
+    is_flag=True,
+    default=False,
+    help="Default is not to skip lineage. Set to skip lineage altogether.",
+)
+@click.option(
+    "--fail-on-missing-lineage/--auto-add-lineage",
+    is_flag=True,
+    default=True,
+    help=(
+        "Default is to fail if lineage documents not present in the database. "
+        "Set auto add to try to index lineage documents."
+    ),
+)
+@click.option(
+    "--verify-lineage",
+    is_flag=True,
+    default=False,
+    help="Default is no verification. Set to verify parent dataset definitions.",
+)
 @click.argument("uri", type=str, nargs=1)
-@click.argument("product", type=str, nargs=1)
-def cli(uri, product):
+@click.argument("product", type=str, nargs=-1)
+def cli(skip_lineage, fail_on_missing_lineage, verify_lineage, uri, product):
     skips = [".*NBAR.*", ".*SUPPLEMENTARY.*", ".*NBART.*", ".*/QA/.*"]
     select = [".*ARD-METADATA.yaml"]
     print(f"Crawling {uri} on Thredds")
@@ -60,5 +76,13 @@ def cli(uri, product):
 
     # Consume generator and fetch YAML's
     dc = Datacube()
-    added, failed = dump_list_to_odc(yaml_contents, dc, product)
+    added, failed = dump_list_to_odc(
+        yaml_contents,
+        dc,
+        product,
+        skip_lineage=skip_lineage,
+        fail_on_missing_lineage=fail_on_missing_lineage,
+        verify_lineage=verify_lineage,
+    )
+
     print(f"Added {added} Datasets, Failed {failed} Datasets")
