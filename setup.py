@@ -5,7 +5,7 @@ with open("README.rst", "r") as fh:
 
 setuptools.setup(
     name="datacube-index",
-    version="0.0.1",
+    version="0.0.2a",
     author="Geoscience Australia",
     author_email="earth.observation@ga.gov.au",
     description="An application to index data from S3 to Datacube PosgreSQL Database",

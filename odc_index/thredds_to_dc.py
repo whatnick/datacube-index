@@ -22,7 +22,7 @@ def dump_list_to_odc(yaml_content_list: list, dc: Datacube, product: str):
         transform=None,
         products=[product],
         fail_on_missing_lineage=False,
-        verify_lineage=False,
+        skip_lineage=True
     )
     ds_added = 0
     ds_failed = 0
