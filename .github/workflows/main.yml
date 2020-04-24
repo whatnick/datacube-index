@@ -69,7 +69,7 @@ jobs:
         docker-compose run dc-index datacube system check
         docker-compose run dc-index datacube metadata add https://raw.githubusercontent.com/GeoscienceAustralia/digitalearthau/develop/digitalearthau/config/metadata-types.odc-type.yaml || true
         docker-compose run dc-index datacube product add https://raw.githubusercontent.com/GeoscienceAustralia/digitalearthau/develop/digitalearthau/config/products/ga_s2_ard.odc-product.yaml
-        docker-compose run dc-index thredds-to-dc --auto-add-lineage http://dapds00.nci.org.au/thredds/catalog/if87/2018-11-29/ s2a_ard_granule s2a_level1c_granule s2b_ard_granule s2b_level1c_granule
+        docker-compose run dc-index thredds-to-dc --auto-add-lineage http://dapds00.nci.org.au/thredds/catalog/if87/2018-11-29/ "s2a_ard_granule s2a_level1c_granule s2b_ard_granule s2b_level1c_granule"
         echo "Checking Indexed Datasets Count"
         docker-compose exec -T dc-db psql -U postgres -c "SELECT count(*) from agdc.dataset"
         docker-compose down

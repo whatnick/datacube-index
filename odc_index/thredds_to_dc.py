@@ -10,8 +10,15 @@ from odc.thredds import thredds_find_glob, download_yamls
 from odc.index import from_yaml_doc_stream
 from datacube import Datacube
 
+from typing import List, Tuple
 
-def dump_list_to_odc(yaml_content_list: list, dc: Datacube, products: list, **kwargs):
+
+def dump_list_to_odc(
+    yaml_content_list: List[Tuple[bytes, str, str]],
+    dc: Datacube,
+    products: List[str],
+    **kwargs,
+):
     expand_stream = (
         ("https://" + d[1], d[0]) for d in yaml_content_list if d[0] is not None
     )
@@ -64,11 +71,19 @@ def dump_list_to_odc(yaml_content_list: list, dc: Datacube, products: list, **kw
     help="Default is no verification. Set to verify parent dataset definitions.",
 )
 @click.argument("uri", type=str, nargs=1)
-@click.argument("product", type=str, nargs=-1)
-def cli(skip_lineage, fail_on_missing_lineage, verify_lineage, uri, product):
+@click.argument("product", type=str, nargs=1)
+def cli(
+    skip_lineage: bool,
+    fail_on_missing_lineage: bool,
+    verify_lineage: bool,
+    uri: str,
+    product: str,
+):
     skips = [".*NBAR.*", ".*SUPPLEMENTARY.*", ".*NBART.*", ".*/QA/.*"]
     select = [".*ARD-METADATA.yaml"]
+    candidate_products = product.split()
     print(f"Crawling {uri} on Thredds")
+    print(f"Matching to {candidate_products}")
     yaml_urls = thredds_find_glob(uri, skips, select)
     print(f"Found {len(yaml_urls)} datasets")
 
@@ -79,7 +94,7 @@ def cli(skip_lineage, fail_on_missing_lineage, verify_lineage, uri, product):
     added, failed = dump_list_to_odc(
         yaml_contents,
         dc,
-        product,
+        candidate_products,
         skip_lineage=skip_lineage,
         fail_on_missing_lineage=fail_on_missing_lineage,
         verify_lineage=verify_lineage,
