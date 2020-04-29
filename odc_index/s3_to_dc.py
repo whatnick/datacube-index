@@ -8,17 +8,17 @@ from typing import Tuple
 
 import click
 from odc.aio import s3_find_glob, S3Fetcher
-from odc.index import from_yaml_doc_stream
 from datacube import Datacube
+
+from . import eo3_aware_yaml_doc_stream
 
 
 def dump_to_odc(data_stream, dc: Datacube, products: list, **kwargs) -> Tuple[int, int]:
     # TODO: Get right combination of flags for **kwargs in low validation/no-lineage mode
     expand_stream = ((d.url, d.data) for d in data_stream if d.data is not None)
 
-    # TODO: Apply the eo3 transform
-    ds_stream = from_yaml_doc_stream(
-        expand_stream, dc.index, transform=None, products=products, **kwargs
+    ds_stream = eo3_aware_yaml_doc_stream(
+        expand_stream, dc, products=products, **kwargs
     )
     ds_added = 0
     ds_failed = 0
@@ -68,7 +68,6 @@ def dump_to_odc(data_stream, dc: Datacube, products: list, **kwargs) -> Tuple[in
 @click.argument("product", type=str, nargs=-1)
 def cli(skip_lineage, fail_on_missing_lineage, verify_lineage, uri, product):
     """ Iterate through files in an S3 bucket and add them to datacube"""
-    # TODO: Have eo3 argument OR autodetect
 
     # Get a generator from supplied S3 Uri for metadata definitions
     fetcher = S3Fetcher()

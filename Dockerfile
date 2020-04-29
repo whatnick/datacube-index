@@ -19,15 +19,19 @@ RUN apt-get update \
     && sed 's/#.*//' /tmp/requirements-apt.txt | xargs apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
+# Use docker build cache more
+RUN mkdir -p /code/{assets,odc_index,tests}
+ADD ./tests/requirements.txt /code/tests/requirements.txt
+ADD ./assets/requirements.txt /code/assets/requirements.txt
+ADD ./odc_index/requirements.txt /code/odc_index/requirements.txt
 
-# Set up a nice workdir, and only copy the things we care about in
-RUN mkdir -p /code
-ADD . /code
-
-# Install Python requirements 
+# Install Python requirements
 RUN /env/bin/pip install --extra-index-url https://packages.dea.ga.gov.au/ \
 -r /code/odc_index/requirements.txt -r /code/tests/requirements.txt \
 -r /code/assets/requirements.txt
+
+# Set up a nice workdir, and only copy the things we care about in
+ADD . /code
 
 # Install the local package
 RUN /env/bin/pip install /code

@@ -7,10 +7,11 @@ from typing import Tuple
 
 import click
 from odc.thredds import thredds_find_glob, download_yamls
-from odc.index import from_yaml_doc_stream
 from datacube import Datacube
 
 from typing import List, Tuple
+
+from . import eo3_aware_yaml_doc_stream
 
 
 def dump_list_to_odc(
@@ -23,8 +24,8 @@ def dump_list_to_odc(
         ("https://" + d[1], d[0]) for d in yaml_content_list if d[0] is not None
     )
 
-    ds_stream = from_yaml_doc_stream(
-        expand_stream, dc.index, transform=None, products=products, **kwargs
+    ds_stream = eo3_aware_yaml_doc_stream(
+        expand_stream, dc, products=products, **kwargs
     )
     ds_added = 0
     ds_failed = 0
