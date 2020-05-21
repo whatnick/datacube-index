@@ -2,24 +2,9 @@
 """
 import itertools
 
-from odc.index import from_yaml_doc_stream, detect_eo3, prep_eo3
+from odc.index import from_yaml_doc_stream
 from datacube import Datacube
 import yaml
-
-
-def eo3_aware_yaml_doc_stream(data_stream, dc: Datacube, products: list, **kwargs):
-    try:
-        first = next(data_stream)
-    except StopIteration:
-        return []
-
-    parsed = yaml.load(first[1], Loader=yaml.CLoader)
-    transform = prep_eo3 if detect_eo3(parsed) else None
-    data_stream = itertools.chain([first], data_stream)
-
-    return from_yaml_doc_stream(
-        data_stream, dc.index, transform=transform, products=products, **kwargs
-    )
 
 
 def bulk_has_location(loc_list: list, product: str) -> list:

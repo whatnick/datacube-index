@@ -7,18 +7,17 @@ import logging
 from typing import Tuple
 
 import click
+from odc.index import from_yaml_doc_stream
 from odc.aio import s3_find_glob, S3Fetcher
 from datacube import Datacube
-
-from . import eo3_aware_yaml_doc_stream
 
 
 def dump_to_odc(data_stream, dc: Datacube, products: list, **kwargs) -> Tuple[int, int]:
     # TODO: Get right combination of flags for **kwargs in low validation/no-lineage mode
     expand_stream = ((d.url, d.data) for d in data_stream if d.data is not None)
 
-    ds_stream = eo3_aware_yaml_doc_stream(
-        expand_stream, dc, products=products, **kwargs
+    ds_stream = from_yaml_doc_stream(
+        expand_stream, dc.index, products=products, **kwargs
     )
     ds_added = 0
     ds_failed = 0
