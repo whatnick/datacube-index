@@ -21,16 +21,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
-      if: github.event.pull_request.merged || contains(github.ref, 'odc-index-')
+      if: github.event.pull_request.merged || github.event_name == 'release'
       uses: actions/checkout@v1
       with:
         fetch-depth: 0
         ref: master
 
     - name: Get tag for this build if it exists
-      if: contains(github.ref, 'odc-index-')
+      if: github.event_name == 'release'
       run: |
-        echo ::set-env name=RELEASE::${GITHUB_REF/refs\/tags\/odc-index-/}
+        echo ::set-env name=RELEASE::${GITHUB_REF/refs\/tags\/}
         echo $RELEASE
 
     - name: Get git commit hash for merged PR's / Push to master
@@ -40,7 +40,7 @@ jobs:
 
     - name: Build and Push latest Docker Image for Release
       uses: whoan/docker-build-with-cache-action@v4
-      if: contains(github.ref, 'odc-index-')
+      if: github.event_name == 'release'
       with:
         image_name: ${{ env.IMAGE_NAME }}
         username: "${{ secrets.DOCKER_USER }}"
