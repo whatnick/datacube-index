@@ -13,7 +13,9 @@ from datacube import Datacube
 from odc.apps.dc_tools.index_from_tar import stac_transform
 
 
-def dump_to_odc(data_stream, dc: Datacube, products: list, transform=None, **kwargs) -> Tuple[int, int]:
+def dump_to_odc(
+    data_stream, dc: Datacube, products: list, transform=None, **kwargs
+) -> Tuple[int, int]:
     # TODO: Get right combination of flags for **kwargs in low validation/no-lineage mode
     expand_stream = ((d.url, d.data) for d in data_stream if d.data is not None)
 
@@ -65,10 +67,10 @@ def dump_to_odc(data_stream, dc: Datacube, products: list, transform=None, **kwa
     help="Default is no verification. Set to verify parent dataset definitions.",
 )
 @click.option(
-    '--stac',
+    "--stac",
     is_flag=True,
     default=False,
-    help='Expect STAC 1.0 metadata and attempt to transform to ODC EO3 metadata'
+    help="Expect STAC 1.0 metadata and attempt to transform to ODC EO3 metadata",
 )
 @click.argument("uri", type=str, nargs=1)
 @click.argument("product", type=str, nargs=-1)
@@ -99,7 +101,7 @@ def cli(skip_lineage, fail_on_missing_lineage, verify_lineage, stac, uri, produc
         skip_lineage=skip_lineage,
         fail_on_missing_lineage=fail_on_missing_lineage,
         verify_lineage=verify_lineage,
-        transform=transform
+        transform=transform,
     )
 
     print(f"Added {added} Datasets, Failed {failed} Datasets")
