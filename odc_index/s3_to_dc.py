@@ -10,14 +10,15 @@ import click
 from odc.index import from_yaml_doc_stream
 from odc.aio import s3_find_glob, S3Fetcher
 from datacube import Datacube
+from odc.apps.dc_tools.index_from_tar import stac_transform
 
 
-def dump_to_odc(data_stream, dc: Datacube, products: list, **kwargs) -> Tuple[int, int]:
+def dump_to_odc(data_stream, dc: Datacube, products: list, transform=None, **kwargs) -> Tuple[int, int]:
     # TODO: Get right combination of flags for **kwargs in low validation/no-lineage mode
     expand_stream = ((d.url, d.data) for d in data_stream if d.data is not None)
 
     ds_stream = from_yaml_doc_stream(
-        expand_stream, dc.index, products=products, **kwargs
+        expand_stream, dc.index, products=products, transform=transform, **kwargs
     )
     ds_added = 0
     ds_failed = 0
@@ -63,10 +64,20 @@ def dump_to_odc(data_stream, dc: Datacube, products: list, **kwargs) -> Tuple[in
     default=False,
     help="Default is no verification. Set to verify parent dataset definitions.",
 )
+@click.option(
+    '--stac',
+    is_flag=True,
+    default=False,
+    help='Expect STAC 1.0 metadata and attempt to transform to ODC EO3 metadata'
+)
 @click.argument("uri", type=str, nargs=1)
 @click.argument("product", type=str, nargs=-1)
-def cli(skip_lineage, fail_on_missing_lineage, verify_lineage, uri, product):
+def cli(skip_lineage, fail_on_missing_lineage, verify_lineage, stac, uri, product):
     """ Iterate through files in an S3 bucket and add them to datacube"""
+
+    transform = None
+    if stac:
+        transform = stac_transform
 
     # Get a generator from supplied S3 Uri for metadata definitions
     fetcher = S3Fetcher()
@@ -88,6 +99,7 @@ def cli(skip_lineage, fail_on_missing_lineage, verify_lineage, uri, product):
         skip_lineage=skip_lineage,
         fail_on_missing_lineage=fail_on_missing_lineage,
         verify_lineage=verify_lineage,
+        transform=transform
     )
 
     print(f"Added {added} Datasets, Failed {failed} Datasets")
