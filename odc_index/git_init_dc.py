@@ -13,6 +13,7 @@ import requests
 import click
 from datacube import Datacube
 
+
 @click.command("dc-from-git")
 @click.argument("metadata_catalog", type=str, nargs=1)
 @click.argument("product_catalog", type=str, nargs=1)
