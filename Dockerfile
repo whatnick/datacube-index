@@ -20,15 +20,13 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 # Use docker build cache more
-RUN mkdir -p /code/{assets,odc_index,tests}
+RUN mkdir -p /code/{odc_index,tests}
 ADD ./tests/requirements.txt /code/tests/requirements.txt
-ADD ./assets/requirements.txt /code/assets/requirements.txt
 ADD ./odc_index/requirements.txt /code/odc_index/requirements.txt
 
 # Install Python requirements
 RUN /env/bin/pip install --extra-index-url https://packages.dea.ga.gov.au/ \
--r /code/odc_index/requirements.txt -r /code/tests/requirements.txt \
--r /code/assets/requirements.txt
+-r /code/odc_index/requirements.txt -r /code/tests/requirements.txt
 
 # Set up a nice workdir, and only copy the things we care about in
 ADD . /code
@@ -42,8 +40,3 @@ COPY --from=env_builder /env /env
 ENV PATH="/env/bin:${PATH}"
 ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8
-
-# Install dea proto for indexing tools
-COPY assets/update_ranges.sh /code/index/indexing/update_ranges.sh
-COPY assets/update_ranges_wrapper.sh /code/index/indexing/update_ranges_wrapper.sh
-COPY assets/create-index.sh /code/index/create-index.sh
