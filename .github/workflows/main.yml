@@ -29,7 +29,7 @@ jobs:
     - name: Run Shell Linter
       run: |
         sudo apt-get install -y shellcheck
-        for a in $(ls assets/*.sh); do shellcheck $a || true ;done
+        for a in $(ls assets/*.sh); do shellcheck $a ;done
 
     - name: Run Python Linter
       uses: lgeiger/black-action@master
