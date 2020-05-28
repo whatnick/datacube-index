@@ -40,6 +40,19 @@ jobs:
       run: |
         docker build -t datacube-index .
 
+    - name: Run Dockerized Bootstrapping from Git
+      timeout-minutes: 2
+      shell: bash
+      env:
+        PRODUCT_CATALOG : https://raw.githubusercontent.com/GeoscienceAustralia/dea-config/master/workspaces/sandbox-products.csv
+        METADATA_CATALOG : https://raw.githubusercontent.com/GeoscienceAustralia/dea-config/8031d51cc24c23c156966a09fe2ebfec9eec0be2/workspaces/sandbox-metadata.yaml
+      run: |
+        docker-compose up -d
+        docker-compose run dc-index /code/bootstrap-odc.sh $PRODUCT_CATALOG $METADATA_CATALOG
+        docker-compose exec -T dc-db psql -U postgres -c "SELECT count(*) from agdc.metadata_type"
+        docker-compose exec -T dc-db psql -U postgres -c "SELECT count(*) from agdc.dataset_type"
+        docker-compose down
+
     - name: Run Dockerized Tests for S3
       timeout-minutes: 10
       shell: bash

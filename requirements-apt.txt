@@ -1,4 +1,5 @@
 libyaml-dev
 postgresql-11
 git
+wget
 build-essential
