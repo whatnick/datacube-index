@@ -6,6 +6,10 @@
 # In kubernetes pod executor run from <datacube-index>     #
 # container                                                #
 ############################################################
+set -o errexit
+set -o pipefail
+set -o nounset
+
 product_catalog=$1
 metadata_catalog=$2
 
