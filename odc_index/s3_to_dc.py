@@ -10,7 +10,7 @@ import click
 from odc.index import from_yaml_doc_stream
 from odc.aio import s3_find_glob, S3Fetcher
 from datacube import Datacube
-from odc.apps.dc_tools.index_from_tar import stac_transform
+from odc.index.stac import stac_transform
 
 
 def dump_to_odc(
